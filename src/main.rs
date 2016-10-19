@@ -182,6 +182,22 @@ fn colour_to_raw(input: &Apa106Led) -> [u8; 24] {
 	bytes
 }
 
+fn wheel(wheelpos: u8) -> Apa106Led {
+	let mut thingy = wheelpos;
+
+	if thingy < 85 {
+		Apa106Led { red: thingy * 3, green: 255 - thingy * 3, blue: 0 }
+	} else if thingy < 170 {
+		thingy -= 85;
+
+		Apa106Led { red: 255 - thingy * 3, green: 0, blue: thingy * 3 }
+	} else {
+		thingy -= 170;
+
+		Apa106Led { red: 0, green: thingy * 3, blue: 255 - thingy * 3 }
+	}
+}
+
 fn run(args: &pt::run_args) {
 	let spi = tiva_c::spi::Spi::new(tiva_c::spi::SpiConf {
 		peripheral: tiva_c::spi::SpiId::Spi0,
@@ -203,14 +219,20 @@ fn run(args: &pt::run_args) {
 	loop {
 		args.timer.wait_ms(16);
 
-		cube.fill(Apa106Led { red: counter as u8, green: 0, blue: 0 });
+		// cube.fill(Apa106Led { red: counter as u8, green: 0, blue: 0 });
+		cube.fill(wheel(counter as u8));
 
 		cube.flush();
 
-		counter += inc;
+		// counter += inc;
+		counter += 1;
 
-		if counter > 250 || counter == 0 {
-			inc *= -1;
+		if counter > 254 {
+			counter = 0;
 		}
+
+		// if counter > 250 || counter == 0 {
+		// 	inc *= -1;
+		// }
 	}
 }
