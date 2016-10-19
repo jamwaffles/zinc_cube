@@ -128,32 +128,19 @@ fn bit_is_set(byte: u8, bit_index: u8) -> bool {
 	(byte & (1 << bit_index)) != 0
 }
 
-const ON_NIBBLE: u8 = 0b1110;
-const OFF_NIBBLE: u8 = 0b1000;
+const ON_BYTE: u8 = 0b1111_1100;
+const OFF_BYTE: u8 = 0b1100_0000;
 
-/// Send a Colour struct out the SPI port
-/// Each byte in a colour triplet is converted into 8 nibbles and sent as 4 sequential bytes down the SPI line
-fn colour_to_raw(input: &Apa106Led) -> [u8; 12] {
-	// ((a << 4) | (b & 0b1111)).toString(2)
+fn colour_to_raw(input: &Apa106Led) -> [u8; 24] {
+	let mut bytes: [u8; 24] = [0; 24];
 
-	let mut bytes: [u8; 12] = [0; 12];
+	// SPI transmits MSB first
+	for pos in 0..8 {
+		bytes[7 - pos as usize] = if bit_is_set(input.red, pos as u8) { ON_BYTE } else { OFF_BYTE };
 
-	// SPI transmits MSB first, so first bit = upper nibble
-	for pos in 0..4 {
-		let red_upper = if bit_is_set(input.red, pos * 2 + 1) { ON_NIBBLE } else { OFF_NIBBLE };
-		let red_lower = if bit_is_set(input.red, pos * 2) { ON_NIBBLE } else { OFF_NIBBLE };
+		bytes[8 + (7 - pos as usize)] = if bit_is_set(input.green, pos as u8) { ON_BYTE } else { OFF_BYTE };
 
-		bytes[3 - pos as usize] = (red_upper << 4) | (red_lower & 0b1111);
-
-		let green_upper = if bit_is_set(input.green, pos * 2 + 1) { ON_NIBBLE } else { OFF_NIBBLE };
-		let green_lower = if bit_is_set(input.green, pos * 2) { ON_NIBBLE } else { OFF_NIBBLE };
-
-		bytes[4 + (3 - pos) as usize] = (green_upper << 4) | (green_lower & 0b1111);
-
-		let blue_upper = if bit_is_set(input.blue, pos * 2 + 1) { ON_NIBBLE } else { OFF_NIBBLE };
-		let blue_lower = if bit_is_set(input.blue, pos * 2) { ON_NIBBLE } else { OFF_NIBBLE };
-
-		bytes[8 + (3 - pos) as usize] = (blue_upper << 4) | (blue_lower & 0b1111);
+		bytes[16 + (7 - pos as usize)] = if bit_is_set(input.blue, pos as u8) { ON_BYTE } else { OFF_BYTE };
 	}
 
 	bytes
@@ -163,7 +150,7 @@ fn run(args: &pt::run_args) {
 	let spi = tiva_c::spi::Spi::new(tiva_c::spi::SpiConf {
 		peripheral: tiva_c::spi::SpiId::Spi0,
 
-		frequency: 2_339_181
+		frequency: 4_678_362
 	});
 
 	args.uart.puts("Started\r\n");
