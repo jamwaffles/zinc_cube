@@ -6,6 +6,7 @@
 extern crate zinc;
 
 use zinc::hal::spi::Spi;
+// use zinc::hal::cortex_m4::fpu;
 use zinc::hal::timer::Timer;
 use zinc::drivers::chario::CharIO;
 use zinc::hal::tiva_c;
@@ -238,6 +239,8 @@ fn wheel(wheelpos: u8) -> Apa106Led {
 }
 
 fn run(args: &pt::run_args) {
+	// fpu::enable_fpu();
+
 	let spi = tiva_c::spi::Spi::new(tiva_c::spi::SpiConf {
 		peripheral: tiva_c::spi::SpiId::Spi0,
 
