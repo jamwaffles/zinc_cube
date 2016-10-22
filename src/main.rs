@@ -43,21 +43,6 @@ platformtree!(
 					function  = 1;
 				}
 
-				spi_ck@2 {
-					direction = "out";
-					function  = 2;
-				}
-
-				spi_cs@3 {
-					direction = "out";
-					function  = 2;
-				}
-
-				spi_rx@4 {
-					direction = "in";
-					function  = 2;
-				}
-
 				spi_tx@5 {
 					direction = "out";
 					function  = 2;
