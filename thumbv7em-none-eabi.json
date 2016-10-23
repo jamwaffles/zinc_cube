@@ -12,7 +12,7 @@
     "target-pointer-width": "32",
     "no-compiler-rt": true,
     "pre-link-args": [
-        "-mcpu=cortex-m4", "-mthumb",
+        "-mcpu=cortex-m4", "-mthumb", "-mfloat-abi=softfp", "-mfpu=fpv4-sp-d16",
         "-Tlayout.ld"
     ],
     "post-link-args": [
