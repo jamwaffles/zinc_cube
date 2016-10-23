@@ -5,10 +5,12 @@
 
 extern crate zinc;
 
-// use zinc::hal::cortex_m4::fpu;
+// use zinc::hal::spi::Spi;
+use zinc::hal::cortex_m4::fpu;
 use zinc::hal::timer::Timer;
 use zinc::drivers::chario::CharIO;
 use zinc::hal::tiva_c;
+// use core::intrinsics;
 
 mod cube;
 mod apa106led;
@@ -94,8 +96,20 @@ fn wheel(wheelpos: u8) -> Apa106Led {
 	}
 }
 
+fn clamp_to_u8(value: f32) -> u8 {
+	let ret = if value > 255.0 {
+		255
+	} else {
+		value as u8
+	};
+
+	ret
+}
+
 fn run(args: &pt::run_args) {
-	// fpu::enable_fpu();
+	fpu::enable_fpu();
+
+	args.uart.puts("Started\r\n");
 
 	let spi = tiva_c::spi::Spi::new(tiva_c::spi::SpiConf {
 		peripheral: tiva_c::spi::SpiId::Spi0,
@@ -103,26 +117,33 @@ fn run(args: &pt::run_args) {
 		frequency: 4_678_362
 	});
 
-	args.uart.puts("Started\r\n");
-
-	let mut counter: i16 = 0;
-	let mut inc: i16 = 4;
-
 	let mut cube = Cube4::new(&spi);
 
-	cube.fill(Apa106Led { red: 0xff, green: 0, blue: 0 });
+	cube.fill(&Apa106Led { red: 1, green: 0, blue: 0 });
 
 	cube.flush();
 
+	let mut counter = 0;
+
 	loop {
-		args.timer.wait_ms(16);
+		// Rainbow
+		// for index in 0..64 {
+		// 	cube.set_at_index(index as usize, wheel(((index * 4) + counter as u8) & 255));
+		// }
 
-		for index in 0..64 {
-			cube.set_at_index(index as usize, wheel(((index * 4) + counter as u8) & 255));
-		}
+		// cube.fill(&Apa106Led { red: 0, green: 0, blue: 0 });
 
-		cube.flush();
+		// Colour to temp
+		// let col = cube::temp_to_rgb(counter);
 
-		counter += 1;
+		// for index in 0..16 {
+		// 	cube.set_at_index(index as usize, col);
+		// }
+
+		// cube.flush();
+
+		// args.timer.wait_ms(16);
+
+		// counter += 10;
 	}
 }
