@@ -861,6 +861,13 @@ pub fn temp_to_rgb(kelvin: u32) -> Apa106Led {
 const ON_BYTE: u8 = 0b1111_1100;
 const OFF_BYTE: u8 = 0b1100_0000;
 
+#[derive(Copy, Clone)]
+pub struct Voxel {
+	pub x: u8,
+	pub y: u8,
+	pub z: u8,
+}
+
 pub struct Cube4<'a> {
 	spi: &'a tiva_c::spi::Spi,
 
@@ -884,6 +891,33 @@ impl<'a> Cube4<'a> {
 
 	pub fn set_at_index(&mut self, index: usize, colour: Apa106Led) {
 		self.cube_frame[index] = colour;
+	}
+
+	pub fn set_at_coord(&mut self, coord: Voxel, colour: Apa106Led) {
+		let index = match coord.z {
+			0|2 => {
+				match coord.y {
+					0|2 => (4 * coord.y) + coord.x,
+					1|3 => (4 * coord.y) + 3 - coord.x,
+					_ => 64
+				}
+			},
+			1|3 => {
+				match coord.y {
+					0 => 15 - coord.x,
+					2 => 7 - coord.x,
+					1 => coord.x + 7 + coord.y,
+					3 => coord.x + 3 - coord.y,
+					_ => 64
+				}
+			},
+			_ => 64
+		};
+
+		// Z coord is easy, just offset n * (num voxels in layer)
+		let idx = (index + (coord.z * 16)) as usize;
+
+		self.cube_frame[idx] = colour;
 	}
 
 	pub fn flush(&self) {

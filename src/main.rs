@@ -16,7 +16,7 @@ mod cube;
 mod apa106led;
 
 use apa106led::Apa106Led;
-use cube::Cube4;
+use cube::{ Cube4, Voxel };
 
 platformtree!(
 	tiva_c@mcu {
@@ -120,6 +120,12 @@ fn run(args: &pt::run_args) {
 	let mut cube = Cube4::new(&spi);
 
 	cube.fill(&Apa106Led { red: 1, green: 0, blue: 0 });
+
+	cube.flush();
+	args.timer.wait_us(50);
+
+	cube.set_at_coord(Voxel { x: 0, y: 2, z: 1 }, Apa106Led { red: 0, green: 0x0f, blue: 0 });
+	cube.set_at_coord(Voxel { x: 3, y: 0, z: 1 }, Apa106Led { red: 0x0f, green: 0, blue: 0 });
 
 	cube.flush();
 
