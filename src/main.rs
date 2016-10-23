@@ -106,6 +106,31 @@ fn clamp_to_u8(value: f32) -> u8 {
 	ret
 }
 
+static mut seed: u32 = 348723;
+
+fn rand() -> u32 {
+	unsafe {
+		seed = (1103515245 * seed + 12345) % 429496729;
+
+		seed
+	}
+}
+
+fn rand_u8() -> u8 {
+	unsafe {
+		(rand() & 0xff) as u8
+	}
+}
+
+fn rand_range(min: u32, max: u32) -> u32 {
+	unsafe {
+		rand() % (max + 1 - min) + min
+	}
+}
+
+const MAX_BRIGHTNESS: u8 = 32;
+const FRAME_TIME: u32 = 16 * 2;
+
 fn run(args: &pt::run_args) {
 	fpu::enable_fpu();
 
@@ -119,13 +144,10 @@ fn run(args: &pt::run_args) {
 
 	let mut cube = Cube4::new(&spi);
 
-	cube.fill(&Apa106Led { red: 1, green: 0, blue: 0 });
+	cube.fill(Apa106Led { red: 1, green: 0, blue: 0 });
 
 	cube.flush();
-	args.timer.wait_us(50);
-
-	cube.set_at_coord(Voxel { x: 0, y: 2, z: 1 }, Apa106Led { red: 0, green: 0x0f, blue: 0 });
-	cube.set_at_coord(Voxel { x: 3, y: 0, z: 1 }, Apa106Led { red: 0x0f, green: 0, blue: 0 });
+	args.timer.wait_ms(1);
 
 	cube.flush();
 
@@ -137,19 +159,70 @@ fn run(args: &pt::run_args) {
 		// 	cube.set_at_index(index as usize, wheel(((index * 4) + counter as u8) & 255));
 		// }
 
-		// cube.fill(&Apa106Led { red: 0, green: 0, blue: 0 });
+		// Fade red panels up
+		for panel in 0..4 {
+			for i in 0..MAX_BRIGHTNESS {
+				cube.fill_panel(panel, Apa106Led { red: i, green: 0, blue: 0 });
 
-		// Colour to temp
-		// let col = cube::temp_to_rgb(counter);
+				cube.flush();
 
-		// for index in 0..16 {
-		// 	cube.set_at_index(index as usize, col);
-		// }
+				args.timer.wait_ms(FRAME_TIME);
+			}
+		}
 
-		// cube.flush();
+		// Fade all that shit out
+		for i in (0..MAX_BRIGHTNESS).rev() {
+			for panel in 0..4 {
+				cube.fill_panel(panel, Apa106Led { red: i, green: 0, blue: 0 });
+			}
 
-		// args.timer.wait_ms(16);
+			cube.flush();
 
-		// counter += 10;
+			args.timer.wait_ms(FRAME_TIME);
+		}
+
+		// Fade green slices up
+		for slice in 0..4 {
+			for i in 0..MAX_BRIGHTNESS {
+				cube.fill_slice(slice, Apa106Led { red: 0, green: i, blue: 0 });
+
+				cube.flush();
+
+				args.timer.wait_ms(FRAME_TIME);
+			}
+		}
+
+		// Fade all that shit out
+		for i in (0..MAX_BRIGHTNESS).rev() {
+			for slice in 0..4 {
+				cube.fill_slice(slice, Apa106Led { red: 0, green: i, blue: 0 });
+			}
+
+			cube.flush();
+
+			args.timer.wait_ms(FRAME_TIME);
+		}
+
+		// Fade white layers  up
+		for layer in (0..4).rev() {
+			for i in 0..MAX_BRIGHTNESS {
+				cube.fill_layer(layer, Apa106Led { red: i, green: i, blue: i });
+
+				cube.flush();
+
+				args.timer.wait_ms(FRAME_TIME);
+			}
+		}
+
+		// Fade all that shit out
+		for i in (0..MAX_BRIGHTNESS).rev() {
+			for layer in 0..4 {
+				cube.fill_layer(layer, Apa106Led { red: i, green: i, blue: i });
+			}
+
+			cube.flush();
+
+			args.timer.wait_ms(FRAME_TIME);
+		}
 	}
 }
