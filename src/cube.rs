@@ -885,10 +885,6 @@ impl<'a> Cube4<'a> {
 		}
 	}
 
-	pub fn fill(&mut self, fill_colour: &Apa106Led) {
-		self.cube_frame = [*fill_colour; 64];
-	}
-
 	pub fn set_at_index(&mut self, index: usize, colour: Apa106Led) {
 		self.cube_frame[index] = colour;
 	}
@@ -918,6 +914,34 @@ impl<'a> Cube4<'a> {
 		let idx = (index + (coord.z * 16)) as usize;
 
 		self.cube_frame[idx] = colour;
+	}
+
+	pub fn fill(&mut self, fill_colour: Apa106Led) {
+		self.cube_frame = [fill_colour; 64];
+	}
+
+	pub fn fill_layer(&mut self, layer: u8, fill_colour: Apa106Led) {
+		for x in 0..4 {
+			for y in 0..4 {
+				self.set_at_coord(Voxel { x: x, y: y, z: layer }, fill_colour);
+			}
+		}
+	}
+
+	pub fn fill_slice(&mut self, slice: u8, fill_colour: Apa106Led) {
+		for y in 0..4 {
+			for z in 0..4 {
+				self.set_at_coord(Voxel { x: slice, y: y, z: z }, fill_colour);
+			}
+		}
+	}
+
+	pub fn fill_panel(&mut self, panel: u8, fill_colour: Apa106Led) {
+		for x in 0..4 {
+			for z in 0..4 {
+				self.set_at_coord(Voxel { x: x, y: panel, z: z }, fill_colour);
+			}
+		}
 	}
 
 	pub fn flush(&self) {
