@@ -14,8 +14,11 @@ use zinc::hal::tiva_c;
 
 mod cube;
 mod apa106led;
+mod tables;
+mod colour_functions;
 
-use apa106led::{ Apa106Led, WARM_WHITE, fade };
+use colour_functions::{ christmas_wheel, fade };
+use apa106led::{ Apa106Led, WARM_WHITE };
 use cube::{ Cube4, Voxel };
 
 platformtree!(
@@ -79,22 +82,6 @@ platformtree!(
 		}
 	}
 );
-
-fn wheel(wheelpos: u8) -> Apa106Led {
-	let mut thingy = wheelpos;
-
-	if thingy < 85 {
-		Apa106Led { red: thingy * 3, green: 255 - thingy * 3, blue: 0 }
-	} else if thingy < 170 {
-		thingy -= 85;
-
-		Apa106Led { red: 255 - thingy * 3, green: 0, blue: thingy * 3 }
-	} else {
-		thingy -= 170;
-
-		Apa106Led { red: 0, green: thingy * 3, blue: 255 - thingy * 3 }
-	}
-}
 
 fn clamp_to_u8(value: f32) -> u8 {
 	let ret = if value > 255.0 {
