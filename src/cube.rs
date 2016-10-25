@@ -30,11 +30,7 @@ impl<'a> Cube4<'a> {
 		}
 	}
 
-	pub fn set_at_index(&mut self, index: usize, colour: Apa106Led) {
-		self.cube_frame[index] = colour;
-	}
-
-	pub fn set_at_coord(&mut self, coord: Voxel, colour: Apa106Led) {
+	fn coord_to_index(&self, coord: Voxel) -> usize {
 		let index = match coord.z {
 			0|2 => {
 				match coord.y {
@@ -56,9 +52,23 @@ impl<'a> Cube4<'a> {
 		};
 
 		// Z coord is easy, just offset n * (num voxels in layer)
-		let idx = (index + (coord.z * 16)) as usize;
+		(index + (coord.z * 16)) as usize
+	}
+
+	pub fn set_at_index(&mut self, index: usize, colour: Apa106Led) {
+		self.cube_frame[index] = colour;
+	}
+
+	pub fn set_at_coord(&mut self, coord: Voxel, colour: Apa106Led) {
+		let idx = self.coord_to_index(coord);
 
 		self.cube_frame[idx] = colour;
+	}
+
+	pub fn get_at_coord(&self, coord: Voxel) -> Apa106Led {
+		let idx = self.coord_to_index(coord);
+
+		self.cube_frame[idx]
 	}
 
 	pub fn fill(&mut self, fill_colour: Apa106Led) {

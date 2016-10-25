@@ -10,3 +10,9 @@ pub const WARM_WHITE: Apa106Led = Apa106Led {
 	green: 183,
 	blue: 76,
 };
+
+pub const OFF: Apa106Led = Apa106Led {
+	red: 0,
+	green: 0,
+	blue: 0,
+};

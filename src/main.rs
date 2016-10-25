@@ -16,10 +16,14 @@ mod cube;
 mod apa106led;
 mod tables;
 mod colour_functions;
+mod embedded_rand;
+mod patterns;
 
 use colour_functions::{ christmas_wheel, fade };
-use apa106led::{ Apa106Led, WARM_WHITE };
+use apa106led::{ Apa106Led, WARM_WHITE, OFF };
 use cube::{ Cube4, Voxel };
+use embedded_rand::{ rand_range };
+use patterns::{ MAX_BRIGHTNESS };
 
 platformtree!(
 	tiva_c@mcu {
@@ -93,9 +97,6 @@ fn clamp_to_u8(value: f32) -> u8 {
 	ret
 }
 
-const MAX_BRIGHTNESS: u8 = 32;
-const FRAME_TIME: u32 = 16 * 2;
-
 fn run(args: &pt::run_args) {
 	fpu::enable_fpu();
 
@@ -114,80 +115,24 @@ fn run(args: &pt::run_args) {
 	cube.flush();
 	args.timer.wait_ms(1);
 
-	cube.flush();
+	let raindrop_colour = fade(WARM_WHITE, MAX_BRIGHTNESS as f32 / 255.0);
 
 	let mut counter = 0;
 
 	loop {
+		// Rain
+		for _ in 0..4 {
+			patterns::rain(&mut cube, &args.timer, raindrop_colour);
+		}
+
 		// Rainbow
-		// for index in 0..64 {
-		// 	cube.set_at_index(index as usize, wheel(((index * 4) + counter as u8) & 255));
+		// for _ in 0..4 {
+		// 	patterns::christmas_rainbow(&mut cube, &args.timer);
 		// }
 
-		// Fade red panels up
-		for panel in 0..4 {
-			for i in 0..MAX_BRIGHTNESS {
-				cube.fill_panel(panel, Apa106Led { red: i, green: 0, blue: 0 });
-
-				cube.flush();
-
-				args.timer.wait_ms(FRAME_TIME);
-			}
-		}
-
-		// Fade all that shit out
-		for i in (0..MAX_BRIGHTNESS).rev() {
-			for panel in 0..4 {
-				cube.fill_panel(panel, Apa106Led { red: i, green: 0, blue: 0 });
-			}
-
-			cube.flush();
-
-			args.timer.wait_ms(FRAME_TIME);
-		}
-
-		// Fade green slices up
-		for slice in 0..4 {
-			for i in 0..MAX_BRIGHTNESS {
-				cube.fill_slice(slice, Apa106Led { red: 0, green: i, blue: 0 });
-
-				cube.flush();
-
-				args.timer.wait_ms(FRAME_TIME);
-			}
-		}
-
-		// Fade all that shit out
-		for i in (0..MAX_BRIGHTNESS).rev() {
-			for slice in 0..4 {
-				cube.fill_slice(slice, Apa106Led { red: 0, green: i, blue: 0 });
-			}
-
-			cube.flush();
-
-			args.timer.wait_ms(FRAME_TIME);
-		}
-
-		// Fade white layers  up
-		for layer in (0..4).rev() {
-			for i in 0..MAX_BRIGHTNESS {
-				cube.fill_layer(layer, Apa106Led { red: i, green: i, blue: i });
-
-				cube.flush();
-
-				args.timer.wait_ms(FRAME_TIME);
-			}
-		}
-
-		// Fade all that shit out
-		for i in (0..MAX_BRIGHTNESS).rev() {
-			for layer in 0..4 {
-				cube.fill_layer(layer, Apa106Led { red: i, green: i, blue: i });
-			}
-
-			cube.flush();
-
-			args.timer.wait_ms(FRAME_TIME);
-		}
+		// Fadey slices thing
+		// for _ in 0..4 {
+			patterns::animated_slices(&mut cube, &args.timer);
+		// }
 	}
 }
