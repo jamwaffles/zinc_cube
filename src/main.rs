@@ -110,7 +110,7 @@ fn run(args: &pt::run_args) {
 
 	let mut cube = Cube4::new(&spi);
 
-	cube.fill(Apa106Led { red: 1, green: 0, blue: 0 });
+	cube.fill(Apa106Led { red: 2, green: 0, blue: 0 });
 
 	cube.flush();
 	args.timer.wait_ms(1);
@@ -120,19 +120,24 @@ fn run(args: &pt::run_args) {
 	let mut counter = 0;
 
 	loop {
-		// Rain
+		// Rainbow
 		for _ in 0..4 {
+			patterns::christmas_rainbow(&mut cube, &args.timer);
+		}
+
+		// Fadey slices thing
+		for _ in 0..4 {
+			patterns::animated_slices(&mut cube, &args.timer);
+		}
+
+		// Rain
+		for _ in 0..16 {
 			patterns::rain(&mut cube, &args.timer, raindrop_colour);
 		}
 
-		// Rainbow
-		// for _ in 0..4 {
-		// 	patterns::christmas_rainbow(&mut cube, &args.timer);
-		// }
-
-		// Fadey slices thing
-		// for _ in 0..4 {
-			patterns::animated_slices(&mut cube, &args.timer);
-		// }
+		// Blender
+		for _ in 0..16 {
+			patterns::blender(&mut cube, &args.timer, raindrop_colour);
+		}
 	}
 }
