@@ -99,6 +99,12 @@ impl<'a> Cube4<'a> {
 		}
 	}
 
+	pub fn fill_column(&mut self, column: Voxel, fill_colour: Apa106Led) {
+		for z in 0..4 {
+			self.set_at_coord(Voxel { x: column.x, y: column.y, z: z }, fill_colour);
+		}
+	}
+
 	pub fn flush(&self) {
 		for led in self.cube_frame.into_iter() {
 			for byte in colour_to_raw(led).into_iter() {
