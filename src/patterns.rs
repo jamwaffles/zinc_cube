@@ -7,7 +7,6 @@ use cube::{ Cube4, Voxel };
 use embedded_rand::{ rand_range };
 
 pub const MAX_BRIGHTNESS: u8 = 25;
-const FRAME_TIME: u32 = 16;
 
 pub fn rain(cube: &mut Cube4, timer: &TivaCTimer, raindrop_colour: Apa106Led) {
 	// Spawn some new raindrops
@@ -52,11 +51,13 @@ pub fn christmas_rainbow(cube: &mut Cube4, timer: &TivaCTimer) {
 
 		cube.flush();
 
-		timer.wait_ms(FRAME_TIME);
+		timer.wait_ms(16);
 	}
 }
 
 pub fn animated_slices(cube: &mut Cube4, timer: &TivaCTimer) {
+	const FRAME_TIME: u32 = 40;
+
 	// Fade red panels up
 	for panel in 0..4 {
 		for i in 0..MAX_BRIGHTNESS {
@@ -126,8 +127,11 @@ pub fn animated_slices(cube: &mut Cube4, timer: &TivaCTimer) {
 
 pub fn blender(cube: &mut Cube4, timer: &TivaCTimer, fill_colour: Apa106Led) {
 	for offs in 0..6 {
-		// Clear cube
-		cube.fill(Apa106Led { red: 1, green: 0, blue: 0 });
+		for i in 0..64 {
+			cube.set_at_index(i, Apa106Led { red: 0, green: 0, blue: 0 });
+
+			timer.wait_us(1);
+		}
 
 		// Inside ring
 		match offs {
@@ -152,6 +156,6 @@ pub fn blender(cube: &mut Cube4, timer: &TivaCTimer, fill_colour: Apa106Led) {
 
 		cube.flush();
 
-		timer.wait_ms(75);
+		timer.wait_ms(100);
 	}
 }
