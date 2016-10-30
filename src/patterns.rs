@@ -123,3 +123,35 @@ pub fn animated_slices(cube: &mut Cube4, timer: &TivaCTimer) {
 		timer.wait_ms(FRAME_TIME);
 	}
 }
+
+pub fn blender(cube: &mut Cube4, timer: &TivaCTimer, fill_colour: Apa106Led) {
+	for offs in 0..6 {
+		// Clear cube
+		cube.fill(Apa106Led { red: 1, green: 0, blue: 0 });
+
+		// Inside ring
+		match offs {
+			0|1|5 => {
+				cube.fill_column(Voxel { x: 1, y: 2, z: 0 }, fill_colour);
+				cube.fill_column(Voxel { x: 2, y: 1, z: 0 }, fill_colour);
+			},
+			_ => {
+				cube.fill_column(Voxel { x: 1, y: 1, z: 0 }, fill_colour);
+				cube.fill_column(Voxel { x: 2, y: 2, z: 0 }, fill_colour);
+			}
+		}
+
+		// Outside ring
+		if offs < 4 {
+			cube.fill_column(Voxel { x: 3 - offs, y: 0, z: 0 }, fill_colour);
+			cube.fill_column(Voxel { x: offs, y: 3, z: 0 }, fill_colour);
+		} else {
+			cube.fill_column(Voxel { x: 0, y: offs - 3, z: 0 }, fill_colour);
+			cube.fill_column(Voxel { x: 3, y: 3 - (offs - 3), z: 0 }, fill_colour);
+		}
+
+		cube.flush();
+
+		timer.wait_ms(75);
+	}
+}
